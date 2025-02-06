@@ -1,6 +1,8 @@
+import Users from "../components/Users"
+
 function Home() {
   return (
-    <div>Home</div>
+    <Users />
   )
 }
 
