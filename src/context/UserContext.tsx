@@ -22,28 +22,58 @@ export interface GithubUser {
     user_view_type: string;
 }
 
-type UserContextType = {
+type UserState = {
     users: GithubUser[]
+    loading: boolean
 }
 
-export const UserContext = React.createContext<UserContextType>({users: []})
+type UserContextType = {
+    users: GithubUser[]
+    loading: boolean
+    dispatch: React.Dispatch<{ type: string; users?: any }>
+}
+
+export const UserContext = React.createContext<UserContextType>({users: [], loading: false, dispatch: () => {} })
+
+function reducer(state: UserState, action: { type: string; users?: any }) {
+    switch (action.type) {
+        case 'GET_USERS': {
+            return {
+                ...state,
+                users: action.users,
+                loading: false
+            }
+        }
+        case 'CLEAR_USERS': {
+            return {
+                ...state,
+                users: []
+            }
+        }
+        case 'SET_LOADING': {
+            return {
+                ...state,
+                loading: true
+            }
+        }
+        default:
+            return state
+    }
+}
 
 export default function UserProvider({ children }: { children: React.ReactNode }) {
-    const [users, setUsers] = React.useState<GithubUser[]>([])
+    const initialState = {
+        users: [],
+        loading: false
+    }
 
-    React.useEffect(() => {
-        fetch("https://api.github.com/users", {
-            headers: {
-                'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}` ,
-                'Accept': 'application/vnd.github+json',
-                'X-GitHub-Api-Version': '2022-11-28'
-            }
-        })
-        .then(res => res.json())
-        .then(data => setUsers(data))
-    }, [])
+    const [state, dispatch] = React.useReducer(reducer, initialState)
 
-  return <UserContext.Provider value={{users}}>
+    return <UserContext.Provider value={{
+        users: state?.users,
+        loading: state?.loading,
+        dispatch: dispatch
+    }}>
     {children}
   </UserContext.Provider>
 }

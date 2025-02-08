@@ -1,8 +1,8 @@
-import Users from "../components/Users"
+import UserSearch from "../components/UserSearch"
 
 function Home() {
   return (
-    <Users />
+    <UserSearch />
   )
 }
 
