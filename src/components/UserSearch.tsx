@@ -1,14 +1,17 @@
 import React from "react"
-import { UserContext } from "../context/UserContext"
+import { UserContext } from "../context/github/GithubContext"
 import UserCard from "./UserCard"
 import spinner from "../assets/loading.svg"
+import { AlertContext } from "../context/alert/AlertContext"
+import Alert from "./Alert"
 
 export default function UserSearch() {
     const {users, loading, dispatch} = React.useContext(UserContext)
+    const {alert, setAlert} = React.useContext(AlertContext)
     const [searched, setSearched] = React.useState<boolean>(false)
 
     function searchUsers(search: string) {
-        dispatch({type: 'SET_LOADING'})
+        dispatch({type: 'SET_LOADING', users: []})
         setSearched(true)
         fetch("https://api.github.com/search/users?q=" + search, {
             headers: {
@@ -27,13 +30,19 @@ export default function UserSearch() {
 
     function clearUsers() {
         dispatch({
-            type: 'CLEAR_USERS'
+            type: 'CLEAR_USERS',
+            users: []
         })
         setSearched(false)
     }
 
     function handleAction(formData: FormData) {
-        searchUsers(formData.get("search"))
+        const text = formData.get("search")
+        if(!text) {
+            setAlert("SET_ALERT", "Enter search text")
+        } else {
+            searchUsers(text)
+        }
     }
 
     return <div>
@@ -45,7 +54,6 @@ export default function UserSearch() {
                         type="text"
                         placeholder="search user"
                         name="search"
-                        required
                     ></input>
                     </label>
                     <div className="validator-hint hidden">enter search text</div>
@@ -56,6 +64,10 @@ export default function UserSearch() {
                 )}
             </div>
         </form>
+        {
+            alert ?
+            <Alert>{alert}</Alert> : null
+        }
         {
             loading ? 
                 <div className="flex justify-center items-center">
@@ -70,6 +82,5 @@ export default function UserSearch() {
                 {users.map(user => <UserCard user={user} key={user.login} />)}
             </div>
         }
-
     </div>
 }

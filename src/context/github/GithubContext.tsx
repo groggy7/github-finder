@@ -1,4 +1,5 @@
 import React from "react"
+import GithubReducer, { UserAction } from "./GithubReducer";
 
 export interface GithubUser {
     login: string;
@@ -22,52 +23,25 @@ export interface GithubUser {
     user_view_type: string;
 }
 
-type UserState = {
-    users: GithubUser[]
-    loading: boolean
-}
-
 type UserContextType = {
     users: GithubUser[]
     loading: boolean
-    dispatch: React.Dispatch<{ type: string; users?: any }>
+    dispatch: React.Dispatch<UserAction>
+}
+
+type UserProviderProps = {
+    children: React.ReactNode
 }
 
 export const UserContext = React.createContext<UserContextType>({users: [], loading: false, dispatch: () => {} })
 
-function reducer(state: UserState, action: { type: string; users?: any }) {
-    switch (action.type) {
-        case 'GET_USERS': {
-            return {
-                ...state,
-                users: action.users,
-                loading: false
-            }
-        }
-        case 'CLEAR_USERS': {
-            return {
-                ...state,
-                users: []
-            }
-        }
-        case 'SET_LOADING': {
-            return {
-                ...state,
-                loading: true
-            }
-        }
-        default:
-            return state
-    }
-}
-
-export default function UserProvider({ children }: { children: React.ReactNode }) {
+export default function UserProvider({ children }: UserProviderProps) {
     const initialState = {
         users: [],
         loading: false
     }
 
-    const [state, dispatch] = React.useReducer(reducer, initialState)
+    const [state, dispatch] = React.useReducer(GithubReducer, initialState)
 
     return <UserContext.Provider value={{
         users: state?.users,

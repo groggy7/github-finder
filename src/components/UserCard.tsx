@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { GithubUser } from "../context/UserContext";
+import { GithubUser } from "../context/github/GithubContext";
 
 type UserCardProps = {
     user: GithubUser
