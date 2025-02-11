@@ -1,24 +1,56 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import React from "react";
 import { UserContext } from "../context/github/GithubContext";
 import { FaCodepen, FaStore, FaUserFriends, FaUsers, FaArrowLeft, FaStar } from "react-icons/fa";
 import { FaCodeFork } from "react-icons/fa6";
 import { IoWarning } from "react-icons/io5";
+import { getUser, getUserRepos } from "../context/github/GithubActions";
+import spinner from "../assets/loading.svg"
 
 export default function User() {
     const params = useParams()
-    const {user, repos, getUser, getUserRepos} = React.useContext(UserContext)
+    const {user, repos, loading, dispatch} = React.useContext(UserContext)
+    const navigate = useNavigate()
 
     React.useEffect(() => {
-        if (params.login) {
-            getUser(params.login);
-            getUserRepos(params.login);
+        dispatch({ type: 'SET_LOADING' })
+        async function getUserData() {
+            if (params.login) {
+                const user = await getUser(params.login)
+                const repos = await getUserRepos(params.login)
+
+                dispatch({type: 'SET_USER', user: user})
+                dispatch({type: 'SET_REPOS', repos: repos})
+            }
+        }
+
+        getUserData()
+    }, [])
+
+    React.useEffect(() => {
+        return () => {
+            dispatch({ type: 'CLEAR_USER'})
         }
     }, [])
 
+    function handleBack() {
+        dispatch({ type: 'CLEAR_USER'})
+        navigate('..')
+    }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center">
+                <img src={spinner} alt="loading" width="40px" />
+            </div>
+        )
+    }
+
     return user ? 
      <div className="flex flex-col gap-8 w-10/12 mx-auto p-8">
-        <Link to=".." className="btn btn-ghost self-start ml-2.5"><FaArrowLeft className="mr-2" />Back to Search</Link>
+        <button onClick={handleBack} className="btn btn-ghost self-start ml-2.5">
+            <FaArrowLeft className="mr-2" />Back to Search
+        </button>
         <div className="flex gap-8 px-6">
             <div className="relative">
                 <img 

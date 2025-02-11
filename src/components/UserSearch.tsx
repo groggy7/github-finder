@@ -4,18 +4,23 @@ import UserCard from "./UserCard"
 import spinner from "../assets/loading.svg"
 import { AlertContext } from "../context/alert/AlertContext"
 import Alert from "./Alert"
+import { searchUsers } from "../context/github/GithubActions"
 
 export default function UserSearch() {
-    const {users, loading, searchUsers, clearUsers} = React.useContext(UserContext)
+    const {users, loading, dispatch} = React.useContext(UserContext)
     const {alert, setAlert} = React.useContext(AlertContext)
     const [searched, setSearched] = React.useState<boolean>(false)
 
-    function handleAction(formData: FormData) {
+    async function handleAction(formData: FormData) {
         const text = formData.get("search")
         if(!text) {
             setAlert("SET_ALERT", "Enter search text")
         } else {
-            searchUsers(String(text))
+            const res = await searchUsers(String(text))
+            dispatch({
+                type: 'SET_USERS',
+                users: res
+            })
         }
     }
 
@@ -35,7 +40,7 @@ export default function UserSearch() {
                 <button className="btn btn-neutral join-item">Search</button>
                 {users.length > 0 && (
                     <button className="btn btn-ghost join-item" onClick={() => {
-                        clearUsers()
+                        dispatch({type: 'CLEAR_USERS'})
                         setSearched(false)
                     }}>Clear</button>
                 )}

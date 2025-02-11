@@ -153,7 +153,7 @@ export type UserState = {
 }
 
 export type UserAction = {
-    type: string
+    type: 'SET_USERS' | 'SET_USER' | 'SET_REPOS' | 'CLEAR_USERS' | 'CLEAR_USER' | 'SET_LOADING'
     users?: GithubUser[]
     user?: GithubUserDetails
     repos?: GitHubRepo[]
@@ -186,6 +186,13 @@ export default function GithubReducer(state: UserState, action: UserAction) {
             return {
                 ...state,
                 users: []
+            }
+        }
+        case 'CLEAR_USER': {
+            return {
+                ...state,
+                user: undefined,
+                repos: []
             }
         }
         case 'SET_LOADING': {
