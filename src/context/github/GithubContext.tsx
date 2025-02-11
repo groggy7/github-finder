@@ -1,6 +1,7 @@
 import React from "react"
 import GithubReducer from "./GithubReducer";
 import { GithubUser, GithubUserDetails, GitHubRepo, UserState } from "./GithubReducer";
+import axios from "axios";
 
 type UserContextType = {
     users: GithubUser[]
@@ -25,6 +26,15 @@ export const UserContext = React.createContext<UserContextType>({
     clearUsers: () => {}, 
 })
 
+const axiosInstance = axios.create({
+    baseURL: 'https://api.github.com',
+    headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+    }
+})
+
 export default function UserProvider({ children }: UserProviderProps) {
     const initialState: UserState = {
         users: [],
@@ -47,17 +57,11 @@ export default function UserProvider({ children }: UserProviderProps) {
         })
         
         try {
-            const response = await fetch("https://api.github.com/search/users?q=" + search, {
-                headers: {
-                    'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`,
-                    'Accept': 'application/vnd.github+json',
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
-            })
-            const data = await response.json()
-            dispatch({
-                type: 'SET_USERS',
-                users: data.items
+            axiosInstance.get(`/search/users?q=${search}`).then((res) => {
+                dispatch({
+                    type: 'SET_USERS',
+                    users: res.data.items
+                })
             })
         } catch (err) {
             console.error(err)
@@ -67,47 +71,35 @@ export default function UserProvider({ children }: UserProviderProps) {
             })
         }
     }
-
+    
     async function getUser(username: string) {
         dispatch({
             type: 'SET_LOADING'
         })
-
+    
         try {
-            const response = await fetch("https://api.github.com/users/" + username, {
-                headers: {
-                    'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`,
-                    'Accept': 'application/vnd.github+json',
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
-            })
-            const data = await response.json()
-            dispatch({
-                type: 'SET_USER',
-                user: data
+            axiosInstance.get(`/users/${username}`).then((res) => {
+                dispatch({
+                    type: 'SET_USER',
+                    user: res.data
+                })
             })
         } catch (err) {
             console.error(err)
         }
     }
-
+    
     async function getUserRepos(username: string) {
         dispatch({
             type: 'SET_LOADING'
         })
-
+    
         try {
-            const response = await fetch(`https://api.github.com/users/${username}/repos`, {
-                headers: {
-                    'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`,
-                    'Accept': 'application/vnd.github+json',
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
-            })
-            const data = await response.json()
-            dispatch({
-                type: 'SET_REPOS',
-                repos: data
+            axiosInstance.get(`/users/${username}/repos`).then((res) => {
+                dispatch({
+                    type: 'SET_REPOS',
+                    repos: res.data
+                })
             })
         } catch (err) {
             console.error(err)

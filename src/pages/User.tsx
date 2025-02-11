@@ -35,7 +35,7 @@ export default function User() {
                 <div className="flex gap-4 items-end">
                     <h1 className="text-2xl">{user.name}</h1>
                     <div className="badge badge-soft badge-accent">{user.type}</div>
-                    {user.hireable ? <div className="badge badge-soft badge-info">{user.hireable}</div> : null}
+                    {user.hireable === true && <div className="badge badge-soft badge-info">Hireable</div>}
                 </div>
                 <p>{user.bio}</p>
                 <a className="btn btn-outline self-start" href={user.html_url} target="_blank">VISIT GITHUB PROFILE</a>
@@ -46,7 +46,14 @@ export default function User() {
                     </div>
                     <div className="stat">
                         <h3 className="stat-title">Website</h3>
-                        <p className="stat-value text-lg">{user.blog || "no info"}</p>
+                        <a 
+                            className="stat-value text-lg" 
+                            href={user.blog && !user.blog.startsWith('http') ? `https://${user.blog}` : user.blog} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {user.blog || "no info"}
+                        </a>
                     </div>
                     <div className="stat">
                         <h3 className="stat-title">Twitter</h3>
@@ -82,7 +89,7 @@ export default function User() {
                 <li className="p-4 pb-2 text-lg tracking-wide font-bold underline underline-offset-4">Latest Repositories</li>
                 {
                     repos.map(repo => (
-                    <li className="list-row">
+                    <li className="list-row" key={repo.id}>
                         <div className="flex flex-col gap-3">
                             <a href={repo.html_url} target="_blank" className="text-lg">{repo.name}</a>
                             {repo.description ?? <p className="m-0">{repo.description}</p>}
