@@ -6,42 +6,16 @@ import { AlertContext } from "../context/alert/AlertContext"
 import Alert from "./Alert"
 
 export default function UserSearch() {
-    const {users, loading, dispatch} = React.useContext(UserContext)
+    const {users, loading, searchUsers, clearUsers} = React.useContext(UserContext)
     const {alert, setAlert} = React.useContext(AlertContext)
     const [searched, setSearched] = React.useState<boolean>(false)
-
-    function searchUsers(search: string) {
-        dispatch({type: 'SET_LOADING', users: []})
-        setSearched(true)
-        fetch("https://api.github.com/search/users?q=" + search, {
-            headers: {
-                'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}` ,
-                'Accept': 'application/vnd.github+json',
-                'X-GitHub-Api-Version': '2022-11-28'
-            }
-        })
-        .then(res => res.json())
-        .then(data => dispatch({
-            type: 'GET_USERS',
-            users: data.items
-        }))
-        .catch(err => console.error(err))
-    }
-
-    function clearUsers() {
-        dispatch({
-            type: 'CLEAR_USERS',
-            users: []
-        })
-        setSearched(false)
-    }
 
     function handleAction(formData: FormData) {
         const text = formData.get("search")
         if(!text) {
             setAlert("SET_ALERT", "Enter search text")
         } else {
-            searchUsers(text)
+            searchUsers(String(text))
         }
     }
 
@@ -60,7 +34,10 @@ export default function UserSearch() {
                 </div>
                 <button className="btn btn-neutral join-item">Search</button>
                 {users.length > 0 && (
-                    <button className="btn btn-ghost join-item" onClick={clearUsers }>Clear</button>
+                    <button className="btn btn-ghost join-item" onClick={() => {
+                        clearUsers()
+                        setSearched(false)
+                    }}>Clear</button>
                 )}
             </div>
         </form>
