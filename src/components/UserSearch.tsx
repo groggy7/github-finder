@@ -25,10 +25,10 @@ export default function UserSearch() {
     }
 
     return <div>
-        <form action={handleAction} className="flex justify-center items-center p-4">
+        <form action={handleAction} className="flex justify-center p-4">
             <div className="join">
-                <div>
-                    <label className="input validator join-item w-72">
+                <div className="w-full">
+                    <label className="input validator join-item">
                     <input
                         type="text"
                         placeholder="search user"
